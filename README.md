@@ -5,7 +5,7 @@
 - Extensibility
 - SOLID Compliant
 
-# Functional
+### Functional
 - Register a user ride booking
 - Register cabs into the fleet and also release them when ride's complete
 - Match cab's with rider booking request
@@ -13,10 +13,35 @@
 - Maintain active and archived rides along with queued ride requests.
 
 
-# Nonfunctional
+### Nonfunctional
 - Parallelization 
 - Thread Safety / Sync
-- 
+
+
+## Code Snippets
+
+### Sample Output
+```
+There are 3 rides right now.
+Status of booking 94: COMPLETE
+Status of booking 16: ACTIVE
+Status of booking 13: ACTIVE
+There are 3 rides right now.
+Booking: 13 is complete. Released cab: Cab(id=5, booked=false, location=com.lldubercab.internal.Location.Location@40d44b21)
+There are 2 rides right now.
+Booking: 16 is complete. Released cab: Cab(id=4, booked=false, location=com.lldubercab.internal.Location.Location@1f7f6e97)
+There are 1 rides right now.
+There are 1 rides right now.
+Booking: 16 is complete. Released cab: Cab(id=3, booked=false, location=com.lldubercab.internal.Location.Location@4223f8b1)
+There are no active rides in the system.
+There are no active rides in the system.
+Status of booking 94: COMPLETE
+Status of booking 16: COMPLETE
+Status of booking 13: COMPLETE
+```
+
+### Main Method
+
 ```
     public static void main(String[] args) {
 
