@@ -59,7 +59,7 @@ public class RideService {
                         cabManager.release(booking.getCab());
                         booking.setStatus(BookingStatus.COMPLETE);
                         archivedTrips.add(booking);
-                        System.out.println("Booking: " + booking.getId() + " is complete. Released cab: " + booking.getCab());
+                        System.out.println(Thread.currentThread().getName() + " Booking: " + booking.getId() + " is complete. Released cab: " + booking.getCab().getId());
                    }
                    synchronized(activeRideQueue) {
                        activeRideQueue.remove(booking);

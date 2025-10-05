@@ -78,7 +78,6 @@ public class Main {
         final Passenger user4 = new Passenger("connor4");
         final Booking booking5 = rideService.requestRide(user4,  System.currentTimeMillis(), new Location(25.00, 25.00), new Location(25.00, 25.00));
 
-
         final Passenger user5 = new Passenger("connor5");
         final Booking booking6 = rideService.requestRide(user5,  System.currentTimeMillis(), new Location(25.00, 25.00), new Location(25.00, 25.00));
 
