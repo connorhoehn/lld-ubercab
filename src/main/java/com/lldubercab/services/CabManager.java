@@ -2,27 +2,53 @@ package com.lldubercab.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
+import com.lldubercab.model.booking.Booking;
 import com.lldubercab.model.cab.Cab;
 
 public class CabManager {
-    private List<Cab> cabs = new ArrayList<>();
+    private Map<Integer, Cab> cabs = new ConcurrentHashMap<>();
+
+    final private MatcherService matcherService = new MatcherService();
 
     public boolean cabsAvailable() {
         return cabs.size() > 0 ? true : false;
     }
 
-    public Cab findCab() {
-        return cabs.get(0);
+    public Cab findCab(Integer id) {
+        return cabs.get(id);
     }
-    
+
     public void insertIntoFleet(Cab cab) {
-        cabs.add(cab);
+        cabs.put(cab.getId(), cab);
     }
     
+    public boolean assign(Cab cab) {
+        return cab.atomicBook();
+    }
+    
+    public boolean release(Cab cab) {
+        Cab foundCab = findCab(cab.getId());
+
+        final Boolean releaseStatus = foundCab.atomicRelease();
+
+        if (releaseStatus) {
+            synchronized(cabs) {
+                cabs.notifyAll();
+            }
+        }
+
+        return releaseStatus;
+    }
+
     public synchronized List<Cab> findAvailableCabs() {
+
+        List<Cab> allCabs = new ArrayList<>(cabs.values());
         List<Cab> availableList = new ArrayList<>();
-        for (Cab currentCab: cabs) {
+
+        for (Cab currentCab: allCabs) {
             if(!currentCab.getBooked()) {
                 availableList.add(currentCab);
             }
@@ -30,31 +56,19 @@ public class CabManager {
         return availableList;
     }
 
-    private Cab getCab(Cab cab) {
-        for (Cab c: cabs) {
-            if (c.getId() == cab.getId()) {
-                synchronized (c) {
-                    return c;
+    public Cab findMatchingcab(Booking request) {
+        synchronized(cabs) {
+            while (findAvailableCabs().isEmpty()) {
+                try {
+                    cabs.wait();
+                } catch (Exception e) {
+                    //
                 }
             }
-        }
-        return null;
-    }
+            List<Cab> availableCabs = findAvailableCabs();
 
-    public void assign(Cab cab) {
-        synchronized(cab) { // thread safety
-            cab.setBooked(true);
+            return matcherService.match(request, availableCabs);
         }
     }
 
-    public boolean release(Cab cab) {
-        Cab foundCab = getCab(cab); 
-        
-        synchronized(foundCab) { // thread safety
-            if (foundCab.getBooked()) {
-                foundCab.setBooked(false);
-            }
-        }
-        return false;
-    }
 }
