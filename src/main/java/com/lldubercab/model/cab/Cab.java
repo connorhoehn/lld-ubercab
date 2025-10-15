@@ -3,6 +3,7 @@ package com.lldubercab.model.cab;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.lldubercab.internal.Balance;
 import com.lldubercab.internal.Location;
 import com.lldubercab.model.CabCategory;
 import com.lldubercab.model.booking.Booking;
@@ -22,6 +23,8 @@ public class Cab implements ICabObserverer {
     private Boolean booked;
     private Location location;
     private CabCategory category;
+
+    private Balance balance; 
 
     public static class CabBuilder {
         public Cab build() {
