@@ -15,4 +15,8 @@ public class Passenger {
     public Passenger(String name) {
         this.name = name;
     }
+
+    public void addRideRequest(RideRequest request) {
+        rideRequests.add(request);
+    }
 }

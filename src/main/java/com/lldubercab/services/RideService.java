@@ -66,13 +66,16 @@ public class RideService {
             .rideRequest(rideRequest)
             .build();
 
-        // Apply the default pricing stragies for a base rate on known parameters
+        // 1) Apply the default pricing stragies for a base rate on known parameters
         for (IPricingCalculatorStrategy strategy: pricingCalculatorStrategies) {
             strategy.update(booking);
         }
 
+        // 2) Update Stores
         allRidesStore.add(booking);
+        rideRequest.getPassenger().addRideRequest(rideRequest); // utility for user to update ride request parameters
 
+        // 3) Worker Queue
         pendingRideQueue.insert(booking);
 
         System.out.println("Added new booking request to the queue: " + booking.getId());

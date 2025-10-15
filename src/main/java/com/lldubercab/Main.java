@@ -86,11 +86,11 @@ public class Main {
         rideService.requestRide(
             RideRequest.builder()
                 .passenger(user1)
-                .rankingStrategy(IRankingType.BEST_RATING)
                 .pickup(new Location(25.0, 25.0))
                 .dropOff(new Location(25.0, 25.0))
                 .maxDistanceAway(new Distance(25.0))
                 .category(CabCategory.STANDARD)
+                .rankingStrategy(IRankingType.BEST_RATING)
                 .maxPrice(new Price(2000.0))
                 .build()
         );
