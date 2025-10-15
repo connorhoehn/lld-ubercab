@@ -1,6 +1,8 @@
 package com.lldubercab;
 
-import com.lldubercab.internal.Location.Location;
+import com.lldubercab.internal.Distance;
+import com.lldubercab.internal.Location;
+import com.lldubercab.internal.Price;
 import com.lldubercab.model.CabCategory;
 import com.lldubercab.model.RideRequest;
 import com.lldubercab.model.booking.Booking;
@@ -9,6 +11,7 @@ import com.lldubercab.model.cab.Cab;
 import com.lldubercab.model.passenger.Passenger;
 import com.lldubercab.services.CabManager;
 import com.lldubercab.services.RideService;
+import com.lldubercab.strategies.ranking.IRankingType;
 
 // Version 1
 // 
@@ -44,10 +47,12 @@ public class Main {
             .location(new Location(25.0, 25.0))
             .category(CabCategory.LIMO)
             .build();
+
         final Cab cab2 = Cab.builder()
             .location(new Location(25.0, 25.0))
             .category(CabCategory.STANDARD)
             .build();
+            
         final Cab cab3 = Cab.builder()
             .location(new Location(25.0, 25.0))
             .category(CabCategory.STANDARD)
@@ -62,11 +67,12 @@ public class Main {
         
         final Booking booking = rideService.requestRide(RideRequest.builder()
             .passenger(user)
+            .rankingStrategy(IRankingType.DEFAULT)
             .pickup(new Location(25.0, 25.0))
             .dropOff(new Location(25.0, 25.0))
-            .maxDistanceAway(25)
+            .maxDistanceAway(new Distance(25.0))
             .category(CabCategory.STANDARD)
-            .maxPrice(2000.0)
+            .maxPrice(new Price(2000.0))
             .build());
         
         final BookingStatus status = rideService.checkStatus(booking.getId());
@@ -79,13 +85,14 @@ public class Main {
 
         rideService.requestRide(
             RideRequest.builder()
-            .passenger(user1)
-            .pickup(new Location(25.0, 25.0))
-            .dropOff(new Location(25.0, 25.0))
-            .maxDistanceAway(25)
-            .category(CabCategory.STANDARD)
-            .maxPrice(2000.0)
-            .build()
+                .passenger(user1)
+                .rankingStrategy(IRankingType.BEST_RATING)
+                .pickup(new Location(25.0, 25.0))
+                .dropOff(new Location(25.0, 25.0))
+                .maxDistanceAway(new Distance(25.0))
+                .category(CabCategory.STANDARD)
+                .maxPrice(new Price(2000.0))
+                .build()
         );
         
         try { Thread.sleep(3000);} catch (Exception e) {};
@@ -110,9 +117,9 @@ public class Main {
             .passenger(user2)
             .pickup(new Location(25.0, 25.0))
             .dropOff(new Location(25.0, 25.0))
-            .maxDistanceAway(25)
+            .maxDistanceAway(new Distance(25.0))
             .category(CabCategory.STANDARD)
-            .maxPrice(2000.0)
+            .maxPrice(new Price(2000.0))
             .build()
         );
 
@@ -123,9 +130,9 @@ public class Main {
             .passenger(user3)
             .pickup(new Location(25.0, 25.0))
             .dropOff(new Location(25.0, 25.0))
-            .maxDistanceAway(25)
+            .maxDistanceAway(new Distance(25.0))
             .category(CabCategory.STANDARD)
-            .maxPrice(2000.0)
+            .maxPrice(new Price(2000.0))
             .build()
         );
         final Passenger user4 = new Passenger("connor4");
@@ -135,9 +142,9 @@ public class Main {
             .passenger(user4)
             .pickup(new Location(25.0, 25.0))
             .dropOff(new Location(25.0, 25.0))
-            .maxDistanceAway(25)
+            .maxDistanceAway(new Distance(25.0))
             .category(CabCategory.STANDARD)
-            .maxPrice(200.0)
+            .maxPrice(new Price(2000.0))
             .build()
         );
 
@@ -148,9 +155,9 @@ public class Main {
             .passenger(user5)
             .pickup(new Location(25.0, 25.0))
             .dropOff(new Location(25.0, 25.0))
-            .maxDistanceAway(25)
+            .maxDistanceAway(new Distance(25.0))
             .category(CabCategory.STANDARD)
-            .maxPrice(2000.0)
+            .maxPrice(new Price(2000.0))
             .build()
         );
 

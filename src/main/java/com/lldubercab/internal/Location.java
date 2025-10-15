@@ -1,4 +1,4 @@
-package com.lldubercab.internal.Location;
+package com.lldubercab.internal;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,48 +1,41 @@
 package com.lldubercab.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Comparator;
+import java.util.PriorityQueue;
+
 import com.lldubercab.model.booking.Booking;
 
 import lombok.SneakyThrows;
 
 public class ConcurrentRideStore {
 
-    private List<Booking> rideStore = new ArrayList<>();
-
-    public boolean isEmpty() {
-        synchronized(rideStore) {
-            if(rideStore.isEmpty()) {
-                return true;
-            }
-            return false;
+    private PriorityQueue<Booking> rideQueue = new PriorityQueue<>(new Comparator<Booking>() {
+        @Override
+        public int compare(Booking a, Booking b) {
+            return Long.compare(a.getRideRequest().getRequestTime(), b.getRideRequest().getRequestTime());
         }
-    }
+    });
 
     public void insert(Booking booking) {
-        synchronized(rideStore) {
-            rideStore.add(booking);
-            rideStore.notifyAll();
+        synchronized(rideQueue) {
+            rideQueue.add(booking);
+            rideQueue.notifyAll();
         }
     }
 
     @SneakyThrows
     public Booking removeOrWait() {
-        synchronized(rideStore) {
-            while(rideStore.isEmpty()) {
-                rideStore.wait();
-            }
-            if (!rideStore.isEmpty()) {
-                return rideStore.remove(0);
+        synchronized(rideQueue) {
+            Booking booking;
+
+            while(rideQueue.isEmpty()) {
+                rideQueue.wait();
+                booking = rideQueue.poll();
+                if (booking != null) {
+                    return booking;
+                }
             }
         }
         return removeOrWait();
     }
-
-    public List<Booking> clone() {
-        synchronized(rideStore) {
-            return new ArrayList<>(rideStore);
-        }
-    }
-
 }

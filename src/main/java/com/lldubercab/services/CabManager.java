@@ -7,11 +7,25 @@ import java.util.Map;
 
 import com.lldubercab.model.booking.Booking;
 import com.lldubercab.model.cab.Cab;
+import com.lldubercab.strategies.ranking.IRankingType;
+
+import lombok.SneakyThrows;
+
+import com.lldubercab.strategies.ranking.BestRatingRankingPolicy;
+import com.lldubercab.strategies.ranking.DefaultRankingPolicy;
+import com.lldubercab.strategies.ranking.IRankingPolicy;
 
 public class CabManager {
+    private NotificationManager notificationManager = new NotificationManager();
+    
+    final private Map<IRankingType, IRankingPolicy> matchingPolicies = Map.of(
+        IRankingType.DEFAULT, new DefaultRankingPolicy(),
+        IRankingType.BEST_RATING, new BestRatingRankingPolicy()
+        );
+
     private Map<Integer, Cab> cabs = new ConcurrentHashMap<>();
 
-    final private MatcherService matcherService = new MatcherService();
+    final private FilterService filterService = new FilterService();
 
     public boolean cabsAvailable() {
         return cabs.size() > 0 ? true : false;
@@ -26,24 +40,26 @@ public class CabManager {
     }
     
     public boolean assign(Cab cab) {
-        return cab.atomicBook();
+        boolean status = cab.atomicBook();
+
+        if (status) {
+            notificationManager.unsubscribeAvailableCab(cab);            
+        }
+
+        return status;
     }
     
     public boolean release(Cab cab) {
-        Cab foundCab = findCab(cab.getId());
-
-        final Boolean releaseStatus = foundCab.atomicRelease();
+        final Boolean releaseStatus = cab.atomicRelease();
 
         if (releaseStatus) {
-            synchronized(cabs) {
-                cabs.notifyAll();
-            }
+            notificationManager.subscribeAvailableCab(cab);
         }
 
         return releaseStatus;
     }
 
-    public synchronized List<Cab> findAvailableCabs() {
+    public List<Cab> findAvailableCabs() {
 
         List<Cab> allCabs = new ArrayList<>(cabs.values());
         List<Cab> availableList = new ArrayList<>();
@@ -56,18 +72,37 @@ public class CabManager {
         return availableList;
     }
 
-    public Cab findMatchingcab(Booking request) {
+    public Cab matchAndRank(Booking booking) {
+        
+        // 1) Get Riders Matching Policy
+        IRankingType driverRequestedPolicy = booking.getRideRequest().getRankingStrategy();
+        IRankingPolicy policy = matchingPolicies.get(driverRequestedPolicy);
+        
+        // 2) Find available cabs
+        List<Cab> cabs = this.getAvailableCabs(booking);
+
+        // 3) Rank the filtered cabs 
+        cabs = policy.rank(booking, cabs);
+
+        // 4) Return the first one for now
+        Cab cab = cabs.get(0);
+        return (cab == null) ? null : cab;
+    }
+
+    @SneakyThrows
+    public List<Cab> getAvailableCabs(Booking request) {
         synchronized(cabs) {
             while (findAvailableCabs().isEmpty()) {
-                try {
-                    cabs.wait();
-                } catch (Exception e) {
-                    //
-                }
+                cabs.wait();
             }
+
+            // Get all active cabs
             List<Cab> availableCabs = findAvailableCabs();
 
-            return matcherService.match(request, availableCabs);
+            // Filters based on ride request paramers
+            List<Cab> matchedCabs = filterService.match(request, availableCabs);
+
+            return matchedCabs;
         }
     }
 
